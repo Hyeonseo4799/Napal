@@ -6,5 +6,11 @@ import androidx.compose.ui.tooling.preview.Preview
 @Composable
 @Preview
 fun App() {
+    var showSplash by remember { mutableStateOf(true) }
 
+    if (showSplash) {
+        SplashScreen(onFinished = { showSplash = false })
+    } else {
+        // TODO: 메인 화면
+    }
 }
