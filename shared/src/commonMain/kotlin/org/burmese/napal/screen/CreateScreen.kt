@@ -65,7 +65,12 @@ fun CreateScreen(
         }
     )
 
-    Box(modifier = modifier) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .drawBehind { drawGradientBackground() }
+            .then(modifier)
+    ) {
         NapalHeader(
             modifier = Modifier.zIndex(1f),
             title = "새 카드 만들기",
@@ -73,7 +78,6 @@ fun CreateScreen(
         )
         Column(
             modifier = Modifier
-                .drawBehind { drawGradientBackground() }
                 .fillMaxSize()
                 .padding(top = 56.dp, start = 24.dp, end = 24.dp, bottom = 96.dp)
                 .verticalScroll(scrollState),

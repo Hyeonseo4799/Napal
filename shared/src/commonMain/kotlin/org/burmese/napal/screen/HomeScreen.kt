@@ -60,9 +60,10 @@ fun HomeScreen(
     )
 
     Box(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
             .drawBehind { drawGradientBackground() }
+            .then(modifier)
     ) {
         Image(
             modifier = Modifier
