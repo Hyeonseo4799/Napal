@@ -1,4 +1,4 @@
-package org.burmese.napal
+package org.burmese.napal.screen
 
 import androidx.compose.animation.core.EaseInOut
 import androidx.compose.animation.core.RepeatMode.Reverse
@@ -32,16 +32,16 @@ import kotlin.time.toDuration
 @Composable
 fun SplashScreen(onFinished: () -> Unit = {}) {
     // 임시 딜레이 처리
-//    LaunchedEffect(Unit) {
-//        delay(2L.toDuration(DurationUnit.SECONDS))
-//        onFinished.invoke()
-//    }
+    LaunchedEffect(Unit) {
+        delay(2L.toDuration(DurationUnit.SECONDS))
+        onFinished.invoke()
+    }
     val transition = rememberInfiniteTransition(label = "splash")
     val floatY by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = -9f,
+        initialValue = 0.dp.value,
+        targetValue = (-20).dp.value,
         animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 2500, easing = EaseInOut),
+            animation = tween(durationMillis = 1000, easing = EaseInOut),
             repeatMode = Reverse
         ),
         label = "floaty"

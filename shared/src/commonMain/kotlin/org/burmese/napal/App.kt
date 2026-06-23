@@ -2,6 +2,7 @@ package org.burmese.napal
 
 import androidx.compose.runtime.*
 import androidx.compose.ui.tooling.preview.Preview
+import org.burmese.napal.screen.SplashScreen
 
 @Composable
 @Preview
