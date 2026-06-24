@@ -186,6 +186,8 @@ fun ResultScreen(
                         cardGraphicsLayer.record {
                             this@drawWithContent.drawContent()
                         }
+                        cardGraphicsLayer.clip = true
+                        cardGraphicsLayer.setRoundRectOutline(cornerRadius = 24.dp.toPx())
                         drawLayer(cardGraphicsLayer)
                     }
             ) {
@@ -319,7 +321,7 @@ fun ResultScreen(
                     interactionSource = shareInteractionSource
                 ) {
                     NapalText(
-                        text = "저장",
+                        text = "⬇",
                         fontSize = (15.5).dp,
                         color = Color(0xFFE9EBF6),
                         fontWeight = FontWeight.Bold
