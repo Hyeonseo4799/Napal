@@ -5,6 +5,7 @@ import androidx.compose.animation.core.EaseInOut
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -17,12 +18,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -45,6 +48,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
@@ -287,6 +291,7 @@ fun ResultScreen(
                         color = Color(0xFF072B2A)
                     )
                 }
+                Spacer(modifier = Modifier.width(12.dp))
                 Button(
                     modifier = Modifier
                         .size(56.dp)
@@ -306,7 +311,7 @@ fun ResultScreen(
                             Color(0x1FFFFFFF)
                         }
                     ),
-                    shape = RoundedCornerShape(18.dp),
+                    shape = CircleShape,
                     enabled = !isSaving,
                     onClick = {
                         scope.launch {
@@ -320,12 +325,35 @@ fun ResultScreen(
                     },
                     interactionSource = shareInteractionSource
                 ) {
-                    NapalText(
-                        text = "⬇",
-                        fontSize = (15.5).dp,
-                        color = Color(0xFFE9EBF6),
-                        fontWeight = FontWeight.Bold
-                    )
+                    Canvas(modifier = Modifier.size(16.dp)) {
+                        val arrowColor = Color(0xFFE9EBF6)
+                        val strokeWidth = 1.8.dp.toPx()
+                        val centerX = size.width / 2f
+                        val stemBottomY = size.height * 0.65f
+                        val arrowSpread = size.width * 0.5f
+
+                        drawLine(
+                            color = arrowColor,
+                            start = Offset(centerX, 0f),
+                            end = Offset(centerX, stemBottomY),
+                            strokeWidth = strokeWidth,
+                            cap = StrokeCap.Round
+                        )
+                        drawLine(
+                            color = arrowColor,
+                            start = Offset(centerX - arrowSpread / 2f, stemBottomY - arrowSpread / 2f),
+                            end = Offset(centerX, size.height),
+                            strokeWidth = strokeWidth,
+                            cap = StrokeCap.Round
+                        )
+                        drawLine(
+                            color = arrowColor,
+                            start = Offset(centerX + arrowSpread / 2f, stemBottomY - arrowSpread / 2f),
+                            end = Offset(centerX, size.height),
+                            strokeWidth = strokeWidth,
+                            cap = StrokeCap.Round
+                        )
+                    }
                 }
             }
 
