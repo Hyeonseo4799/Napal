@@ -4,6 +4,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.EaseInOut
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -15,11 +16,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -28,6 +32,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,9 +42,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.layer.drawLayer
+import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -48,14 +56,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import coil3.compose.AsyncImage
+import coil3.compose.LocalPlatformContext
 import org.burmese.napal.component.NapalHeader
 import org.burmese.napal.component.NapalText
 import org.burmese.napal.component.drawGradientBackground
 import org.burmese.napal.domain.Card
 import org.burmese.napal.domain.Prompt
+import org.burmese.napal.platform.saveImageToGallery
 import org.burmese.napal.viewmodel.ResultViewModel
+import kotlin.random.Random
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,9 +82,21 @@ fun ResultScreen(
     val scale = remember { Animatable(1f) }
     val scope = rememberCoroutineScope()
     val bottomSheetState = rememberModalBottomSheetState()
+    val cardGraphicsLayer = rememberGraphicsLayer()
+    val platformContext = LocalPlatformContext.current
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val displayedImage = uiState.generatedImage ?: card.byteArray
+
+    var isSaving by remember { mutableStateOf(false) }
+    var saveMessage by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(saveMessage) {
+        if (saveMessage != null) {
+            delay(2000)
+            saveMessage = null
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -158,6 +182,12 @@ fun ResultScreen(
                             }
                         }
                     }
+                    .drawWithContent {
+                        cardGraphicsLayer.record {
+                            this@drawWithContent.drawContent()
+                        }
+                        drawLayer(cardGraphicsLayer)
+                    }
             ) {
                 AsyncImage(
                     modifier = Modifier.fillMaxSize(),
@@ -220,31 +250,81 @@ fun ResultScreen(
                     }
                 }
             }
-            val interactionSource = remember { MutableInteractionSource() }
-            val isPressed by interactionSource.collectIsPressedAsState()
-            Button(
+            val paintInteractionSource = remember { MutableInteractionSource() }
+            val paintIsPressed by paintInteractionSource.collectIsPressedAsState()
+
+            val shareInteractionSource = remember { MutableInteractionSource() }
+            val shareIsPressed by paintInteractionSource.collectIsPressedAsState()
+            Row(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
                     .padding(start = 24.dp, end = 24.dp, bottom = 26.dp)
                     .height(56.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (isPressed) {
-                        Color(0xFF2FB3AA)
-                    } else {
-                        Color(0xFF46d6cd)
-                    },
-                ),
-                shape = RoundedCornerShape(18.dp),
-                contentPadding = PaddingValues(0.dp), // 잘림 방지
-                onClick = { showBottomSheet = true },
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                NapalText(
-                    text = "✦ AI 페인팅",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = (15.5).dp,
-                    color = Color(0xFF072B2A)
-                )
+                Button(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (paintIsPressed) {
+                            Color(0xFF2FB3AA)
+                        } else {
+                            Color(0xFF46d6cd)
+                        },
+                    ),
+                    shape = RoundedCornerShape(18.dp),
+                    contentPadding = PaddingValues(0.dp), // 잘림 방지
+                    onClick = { showBottomSheet = true },
+                ) {
+                    NapalText(
+                        text = "✦ AI 페인팅",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = (15.5).dp,
+                        color = Color(0xFF072B2A)
+                    )
+                }
+                Button(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clip(CircleShape),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (shareIsPressed) {
+                            Color(0xFF13252F)
+                        } else {
+                            Color(0x0DFFFFFF)
+                        },
+                    ),
+                    border = BorderStroke(
+                        width = 1.dp,
+                        color = if (shareIsPressed) {
+                            Color(0xFF1D4950)
+                        } else {
+                            Color(0x1FFFFFFF)
+                        }
+                    ),
+                    shape = RoundedCornerShape(18.dp),
+                    enabled = !isSaving,
+                    onClick = {
+                        scope.launch {
+                            isSaving = true
+                            val bitmap = cardGraphicsLayer.toImageBitmap()
+                            val fileName = "napal_${card.name.ifBlank { "card" }}_${Random.nextInt(100000)}"
+                            val saved = saveImageToGallery(platformContext, bitmap, fileName)
+                            saveMessage = if (saved) "갤러리에 저장했어요" else "저장에 실패했어요"
+                            isSaving = false
+                        }
+                    },
+                    interactionSource = shareInteractionSource
+                ) {
+                    NapalText(
+                        text = "저장",
+                        fontSize = (15.5).dp,
+                        color = Color(0xFFE9EBF6),
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
 
             if (uiState.isLoading) {
@@ -252,13 +332,17 @@ fun ResultScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(Color(0x99000000))
-                        .clickable(indication = null, interactionSource = null) { /** no-op */ },
+                        .clickable(
+                            indication = null,
+                            interactionSource = null
+                        ) { /** no-op */ },
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator(color = Color(0xFF46d6cd))
                 }
             }
 
+            // 에러 처리 추후 변경
             uiState.error?.let { errorMessage ->
                 Box(
                     modifier = Modifier
@@ -269,6 +353,23 @@ fun ResultScreen(
                 ) {
                     NapalText(
                         text = errorMessage,
+                        fontSize = 12.dp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color(0xFFEEF0F8)
+                    )
+                }
+            }
+
+            saveMessage?.let { message ->
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 96.dp)
+                        .background(Color(0xCC0C0D1A), shape = RoundedCornerShape(12.dp))
+                        .padding(horizontal = 16.dp, vertical = 10.dp)
+                ) {
+                    NapalText(
+                        text = message,
                         fontSize = 12.dp,
                         fontWeight = FontWeight.Medium,
                         color = Color(0xFFEEF0F8)
