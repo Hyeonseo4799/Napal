@@ -1,15 +1,20 @@
 package org.burmese.napal.screen
 
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.EaseInOut
+import androidx.compose.animation.core.VectorConverter
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.calculateZoom
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,6 +23,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
@@ -35,24 +45,34 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
 import coil3.compose.AsyncImage
-import io.ktor.client.request.forms.formData
 import org.burmese.napal.component.NapalHeader
 import org.burmese.napal.component.NapalText
 import org.burmese.napal.component.drawGradientBackground
-import org.burmese.napal.model.Card
+import org.burmese.napal.domain.Card
+import org.burmese.napal.domain.Prompt
+import org.burmese.napal.viewmodel.ResultViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ResultScreen(
     modifier: Modifier = Modifier,
     card: Card,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    viewModel: ResultViewModel = viewModel { ResultViewModel() }
 ) {
     var showBottomSheet by remember { mutableStateOf(false) }
-    val rotX = remember { Animatable(0f) }
-    val rotY = remember { Animatable(0f) }
+    val rotation = remember { Animatable(Offset.Zero, Offset.VectorConverter) }
+    val scale = remember { Animatable(1f) }
     val scope = rememberCoroutineScope()
+    val bottomSheetState = rememberModalBottomSheetState()
+
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val displayedImage = uiState.generatedImage ?: card.byteArray
 
     Box(
         modifier = Modifier
@@ -91,6 +111,7 @@ fun ResultScreen(
             }
         } else {
             NapalHeader(
+                modifier = Modifier.zIndex(1f),
                 title = "내 카드",
                 onBack = onBack
             )
@@ -99,24 +120,40 @@ fun ResultScreen(
                     .align(Alignment.Center)
                     .size(width = 224.dp, height = 310.dp)
                     .graphicsLayer {
-                        rotationX = rotX.value
-                        rotationY = rotY.value
+                        rotationX = rotation.value.x
+                        rotationY = rotation.value.y
+                        scaleX = scale.value
+                        scaleY = scale.value
                         cameraDistance = 8 * density
                     }
                     .clip(RoundedCornerShape(24.dp))
                     .pointerInput(Unit) {
+                        var currentScale = scale.value
                         awaitPointerEventScope {
                             while (true) {
                                 val event = awaitPointerEvent()
-                                val pos = event.changes.firstOrNull()?.position
-                                if (pos != null && event.changes.any { it.pressed }) {
-                                    val tiltY = (((pos.x / size.width).coerceIn(0f, 1f)) - 0.5f) * 30f
-                                    val tiltX = -(((pos.y / size.height).coerceIn(0f, 1f)) - 0.5f) * 30f
-                                    scope.launch { rotY.snapTo(tiltY) }
-                                    scope.launch { rotX.snapTo(tiltX) }
-                                } else {
-                                    scope.launch { rotY.animateTo(0f, spring(dampingRatio = 0.6f)) }
-                                    scope.launch { rotX.animateTo(0f, spring(dampingRatio = 0.6f)) }
+                                val pressed = event.changes.filter { it.pressed }
+
+                                when (pressed.size) {
+                                    2 -> {
+                                        val zoom = event.calculateZoom()
+                                        currentScale = (currentScale * zoom).coerceIn(1f, 2.5f)
+                                        scope.launch { scale.snapTo(currentScale) }
+                                    }
+                                    1 -> {
+                                        val pos = pressed.first().position
+                                        val tiltY = (((pos.x / size.width).coerceIn(0f, 1f)) - 0.5f) * 45f
+                                        val tiltX = -(((pos.y / size.height).coerceIn(0f, 1f)) - 0.5f) * 45f
+                                        scope.launch { rotation.snapTo(Offset(tiltX, tiltY)) }
+                                    }
+                                    else -> {
+                                        scope.launch {
+                                            rotation.animateTo(
+                                                Offset.Zero,
+                                                tween(durationMillis = 1000, easing = EaseInOut)
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -124,12 +161,14 @@ fun ResultScreen(
             ) {
                 AsyncImage(
                     modifier = Modifier.fillMaxSize(),
-                    model = card.byteArray,
+                    model = displayedImage,
                     contentDescription = "img_card",
                     contentScale = ContentScale.Crop,
                 )
                 Column(
-                    modifier = Modifier.align(Alignment.BottomStart),
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .padding(start = 16.dp, end = 16.dp, bottom = 18.dp),
                     verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     NapalText(
@@ -153,6 +192,7 @@ fun ResultScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
+                        if (card.tag.isBlank()) return@FlowRow
                         card.tag.split(",").map { it.trim() }.forEach {
                             Box(
                                 modifier = Modifier
@@ -166,7 +206,8 @@ fun ResultScreen(
                                         shape = RoundedCornerShape(99.dp)
                                     )
                                     .padding(horizontal = 10.dp)
-                                    .height(20.dp)
+                                    .height(20.dp),
+                                contentAlignment = Alignment.Center
                             ) {
                                 NapalText(
                                     text = it,
@@ -176,16 +217,25 @@ fun ResultScreen(
                                 )
                             }
                         }
-
                     }
                 }
             }
+            val interactionSource = remember { MutableInteractionSource() }
+            val isPressed by interactionSource.collectIsPressedAsState()
             Button(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
-                    .height(56.dp)
-                    .padding(horizontal = 24.dp),
+                    .padding(start = 24.dp, end = 24.dp, bottom = 26.dp)
+                    .height(56.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (isPressed) {
+                        Color(0xFF2FB3AA)
+                    } else {
+                        Color(0xFF46d6cd)
+                    },
+                ),
+                shape = RoundedCornerShape(18.dp),
                 contentPadding = PaddingValues(0.dp), // 잘림 방지
                 onClick = { showBottomSheet = true },
             ) {
@@ -195,6 +245,89 @@ fun ResultScreen(
                     fontSize = (15.5).dp,
                     color = Color(0xFF072B2A)
                 )
+            }
+
+            if (uiState.isLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color(0x99000000))
+                        .clickable(indication = null, interactionSource = null) { /** no-op */ },
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = Color(0xFF46d6cd))
+                }
+            }
+
+            uiState.error?.let { errorMessage ->
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 96.dp)
+                        .background(Color(0xCC0C0D1A), shape = RoundedCornerShape(12.dp))
+                        .padding(horizontal = 16.dp, vertical = 10.dp)
+                ) {
+                    NapalText(
+                        text = errorMessage,
+                        fontSize = 12.dp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color(0xFFEEF0F8)
+                    )
+                }
+            }
+        }
+
+        if (showBottomSheet) {
+            val styleOptions = listOf(
+                "유화" to Prompt.OilPainting(),
+                "실사" to Prompt.Photorealistic(),
+                "애니메이션" to Prompt.AnimeStyle(),
+                "도트" to Prompt.PixelArt()
+            )
+
+            ModalBottomSheet(
+                sheetState = bottomSheetState,
+                onDismissRequest = { showBottomSheet = false }
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp, vertical = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    NapalText(
+                        text = "어떤 스타일로 그려드릴까요?",
+                        fontSize = 16.dp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF0C0D1A)
+                    )
+                    styleOptions.forEach { (label, prompt) ->
+                        Button(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(48.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFF46d6cd)
+                            ),
+                            shape = RoundedCornerShape(14.dp),
+                            onClick = {
+                                val byteArray = card.byteArray
+                                if (byteArray != null) {
+                                    viewModel.generateImage(prompt, 0.5, byteArray)
+                                }
+                                scope.launch { bottomSheetState.hide() }
+                                showBottomSheet = false
+                            }
+                        ) {
+                            NapalText(
+                                text = label,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 14.dp,
+                                color = Color(0xFF072B2A)
+                            )
+                        }
+                    }
+                }
             }
         }
     }

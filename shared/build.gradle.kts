@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -8,7 +9,56 @@ plugins {
     alias(libs.plugins.kotlinSerialization)
 }
 
+val localProperties = Properties().apply {
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        localPropertiesFile.inputStream().use { load(it) }
+    }
+}
+
+val cfApiToken: String = localProperties.getProperty("CF_API_TOKEN")
+    ?: System.getenv("CF_API_TOKEN")
+    ?: ""
+
+val cfAccountId : String = localProperties.getProperty("CF_ACCOUNT_ID")
+    ?: System.getenv("CF_ACCOUNT_ID")
+    ?: ""
+
+
+val generatedSecretsDir = layout.buildDirectory.dir("generated/secrets")
+
+val generateSecrets by tasks.registering {
+    val outputDir = generatedSecretsDir
+    val apiToken = cfApiToken
+    val accountId = cfAccountId
+    outputs.dir(outputDir)
+    doLast {
+        val file = outputDir.get().file("org/burmese/napal/network/Secrets.kt").asFile
+        file.parentFile.mkdirs()
+        file.writeText(
+            """
+            package org.burmese.napal.network
+
+            internal object Secrets {
+                const val CF_API_TOKEN: String = "$apiToken"
+                const val CF_ACCOUNT_ID: String = "$accountId"
+            }
+            """.trimIndent()
+        )
+    }
+}
+
+tasks.matching { it.name.startsWith("compile") }.configureEach {
+    dependsOn(generateSecrets)
+}
+
 kotlin {
+    sourceSets {
+        commonMain {
+            kotlin.srcDir(generatedSecretsDir)
+        }
+    }
+
     listOf(
         iosArm64(),
         iosSimulatorArm64()
@@ -18,23 +68,23 @@ kotlin {
             isStatic = true
         }
     }
-    
+
     androidLibrary {
-       namespace = "org.burmese.napal.shared"
-       compileSdk = libs.versions.android.compileSdk.get().toInt()
-       minSdk = libs.versions.android.minSdk.get().toInt()
-    
-       compilerOptions {
-           jvmTarget = JvmTarget.JVM_11
-       }
-       androidResources {
-           enable = true
-       }
-       withHostTest {
-           isIncludeAndroidResources = true
-       }
+        namespace = "org.burmese.napal.shared"
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        minSdk = libs.versions.android.minSdk.get().toInt()
+
+        compilerOptions {
+            jvmTarget = JvmTarget.JVM_11
+        }
+        androidResources {
+            enable = true
+        }
+        withHostTest {
+            isIncludeAndroidResources = true
+        }
     }
-    
+
     sourceSets {
         androidMain.dependencies {
             implementation(libs.compose.uiToolingPreview)
@@ -55,6 +105,8 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtimeCompose)
 
             implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.content.negotiation)
+            implementation(libs.ktor.serialization.kotlinx.json)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.androidx.navigation.compose)
             implementation(libs.coil3.compose)

@@ -43,7 +43,7 @@ import org.burmese.napal.component.NapalHeader
 import org.burmese.napal.component.NapalText
 import org.burmese.napal.component.NapalTextField
 import org.burmese.napal.component.drawGradientBackground
-import org.burmese.napal.model.Card
+import org.burmese.napal.domain.Card
 import org.jetbrains.compose.resources.painterResource
 
 @Composable

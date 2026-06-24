@@ -2,17 +2,15 @@ package org.burmese.napal
 
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavHost
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import org.burmese.napal.model.Card
+import org.burmese.napal.domain.Card
 import org.burmese.napal.navigation.Create
 import org.burmese.napal.navigation.Home
 import org.burmese.napal.navigation.Result

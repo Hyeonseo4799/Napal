@@ -1,4 +1,4 @@
-package org.burmese.napal.model
+package org.burmese.napal.domain
 
 data class Card(
     val byteArray: ByteArray? = null,
