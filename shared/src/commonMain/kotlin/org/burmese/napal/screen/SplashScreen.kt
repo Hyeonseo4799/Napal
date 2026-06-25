@@ -1,7 +1,7 @@
 package org.burmese.napal.screen
 
-import androidx.compose.animation.core.EaseInOut
-import androidx.compose.animation.core.RepeatMode.Reverse
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode.Restart
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
@@ -10,7 +10,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
@@ -19,6 +18,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
@@ -37,14 +37,14 @@ fun SplashScreen(onFinished: () -> Unit = {}) {
         onFinished.invoke()
     }
     val transition = rememberInfiniteTransition(label = "splash")
-    val floatY by transition.animateFloat(
-        initialValue = 0.dp.value,
-        targetValue = (-20).dp.value,
+    val cardRotationY by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
         animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 1000, easing = EaseInOut),
-            repeatMode = Reverse
+            animation = tween(durationMillis = 2000, easing = LinearEasing),
+            repeatMode = Restart
         ),
-        label = "floaty"
+        label = "cardRotationY"
     )
 
     Box(
@@ -56,8 +56,11 @@ fun SplashScreen(onFinished: () -> Unit = {}) {
         Image(
             modifier = Modifier
                 .size(width = 118.dp, height = 160.dp)
-                .offset(y = floatY.dp)
-                .align(Alignment.Center),
+                .align(Alignment.Center)
+                .graphicsLayer {
+                    rotationY = cardRotationY
+                    cameraDistance = 12 * density
+                },
             painter = painterResource(Res.drawable.img_splash),
             contentDescription = "img_splash"
         )
