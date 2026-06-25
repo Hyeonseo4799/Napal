@@ -6,8 +6,11 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 
 class Repository {
     @OptIn(ExperimentalEncodingApi::class)
-    suspend fun generateImage(prompt: Prompt, strength: Double, byteArray: ByteArray): ByteArray {
+    suspend fun generateImage(prompt: Prompt, byteArray: ByteArray): ByteArray? {
         val image = Base64.encode(byteArray)
-        return ApiClient.generateImage(prompt, strength, image)
+        val response = ApiClient.generateImage(prompt, image)
+        val content = response.candidates?.first()?.content ?: return null
+        val imageBase64 = content.parts?.mapNotNull { it.inlineData?.data }?.first() ?: return null
+        return Base64.decode(imageBase64)
     }
 }

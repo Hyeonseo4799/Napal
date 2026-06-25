@@ -16,12 +16,16 @@ class ResultViewModel(
     private val _uiState = MutableStateFlow(ResultUiState())
     val uiState: StateFlow<ResultUiState> = _uiState.asStateFlow()
 
-    fun generateImage(prompt: Prompt, strength: Double, byteArray: ByteArray) {
+    fun generateImage(prompt: Prompt, byteArray: ByteArray) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
-                val image = repository.generateImage(prompt, strength, byteArray)
-                _uiState.update { it.copy(isLoading = false, generatedImage = image) }
+                val image = repository.generateImage(prompt, byteArray)
+                image?.let { image ->
+                    _uiState.update {
+                        it.copy(isLoading = false, generatedImage = image)
+                    }
+                }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = e.message ?: "이미지 생성에 실패했어요") }
             }

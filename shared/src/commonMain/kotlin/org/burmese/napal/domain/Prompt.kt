@@ -1,18 +1,8 @@
 package org.burmese.napal.domain
 
 sealed class Prompt(val text: String) {
-    data class OilPainting(val prompt: String = "${DEFAULT_PROMPT}oil painting") : Prompt(prompt)
-    data class Photorealistic(val prompt: String = "${DEFAULT_PROMPT}photorealistic") : Prompt(prompt)
-    data class AnimeStyle(val prompt: String = "${DEFAULT_PROMPT}anime style") : Prompt(prompt)
-    data class PixelArt(val prompt: String = "${DEFAULT_PROMPT}pixel art") : Prompt(prompt)
-
-    companion object {
-        const val DEFAULT_PROMPT = "same pose\n" + "same composition\n" + "preserve details\n" +
-                "preserve structure\n" + "keep original layout\n" + "maintain facial features\n" +
-                "retain original image\n"
-
-        const val NEGATIVE_PROMPT = "deformed, distorted, bad anatomy,\n" +
-                "extra limbs, bad hands,\n" +
-                "extra fingers, blurry"
-    }
+    data class OilPainting(val prompt: String = "Transform the provided photograph into a richly textured oil painting while preserving the exact composition, subject, pose, and facial likeness. Render with thick impasto brushstrokes and visible palette-knife texture, layered glazes, and a warm classical color palette reminiscent of Rembrandt-era portraiture. Show the woven canvas grain beneath the paint, with soft chiaroscuro lighting — deep shadows and luminous highlights. Keep the brushwork loose and gestural in the background, more refined on the focal subject. Painterly, hand-made, gallery-quality finish. Maintain the original aspect ratio.") : Prompt(prompt)
+    data class Photorealistic(val prompt: String = "Convert the provided image into an ultra-realistic photograph while keeping the same subject, composition, pose, and expression. Render as if captured with a full-frame DSLR and an 85mm f/1.4 lens: natural skin texture with visible pores and fine detail, realistic subsurface scattering, true-to-life color grading, and soft natural lighting. Add lifelike depth of field with gentle background bokeh, physically accurate shadows and reflections, and high dynamic range. Photojournalistic realism with sharp focus on the eyes. Preserve the original aspect ratio.") : Prompt(prompt)
+    data class AnimeStyle(val prompt: String = "Redraw the provided photo as a high-quality 2D anime illustration, preserving the subject's pose, composition, hairstyle, and recognizable features. Use clean bold linework, flat cel-shaded coloring with crisp shadow boundaries, vibrant saturated colors, and large expressive eyes with detailed catchlights. Soft anime-style gradient background with subtle light bloom. Modern Japanese animation aesthetic with polished, smooth shading. Simplified yet appealing detail. Keep the original aspect ratio.") : Prompt(prompt)
+    data class PixelArt(val prompt: String = "Recreate the provided image as retro 16-bit pixel art while keeping the same subject, pose, and composition. Use a limited, carefully chosen color palette, a crisp visible pixel grid with no anti-aliasing, deliberate dithering for shading and gradients, and clean 1-pixel outlines. Style reminiscent of classic SNES-era JRPG character portraits — chunky, readable pixel clusters with sharp blocky edges. Render on a clean, simple background. Maintain the original aspect ratio.") : Prompt(prompt)
 }

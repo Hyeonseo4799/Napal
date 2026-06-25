@@ -444,7 +444,7 @@ fun ResultScreen(
                             onClick = {
                                 val byteArray = card.byteArray
                                 if (byteArray != null) {
-                                    viewModel.generateImage(prompt, 0.5, byteArray)
+                                    viewModel.generateImage(prompt, byteArray)
                                 }
                                 scope.launch { bottomSheetState.hide() }
                                 showBottomSheet = false

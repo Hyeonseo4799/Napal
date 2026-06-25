@@ -2,6 +2,7 @@ package org.burmese.napal.network
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.header
 import io.ktor.client.request.post
@@ -10,31 +11,48 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import org.burmese.napal.domain.Prompt
-import org.burmese.napal.domain.Prompt.Companion.NEGATIVE_PROMPT
 
 object ApiClient {
-    private const val BASE_URL = "https://api.cloudflare.com/client/v4/accounts/"
+    private const val BASE_URL = "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash-image:generateContent"
+    private const val TIMEOUT_MILLIS = 3 * 60 * 1000L
 
     private val client = HttpClient {
         install(ContentNegotiation) {
-            json()
+            json(Json { ignoreUnknownKeys = true })
         }
+        install(HttpTimeout) {
+            socketTimeoutMillis = TIMEOUT_MILLIS
+            requestTimeoutMillis = TIMEOUT_MILLIS
+            connectTimeoutMillis = TIMEOUT_MILLIS
+        }
+
     }
 
-    suspend fun generateImage(prompt: Prompt, strength: Double, image: String): ByteArray {
-        return client.post("$BASE_URL${Secrets.CF_ACCOUNT_ID}/ai/run/@cf/runwayml/stable-diffusion-v1-5-img2img") {
-            header(HttpHeaders.Authorization, "Bearer ${Secrets.CF_API_TOKEN}")
+    suspend fun generateImage(prompt: Prompt, image: String): ApiResponse {
+        return client.post(BASE_URL) {
+            header("x-goog-api-key", Secrets.CF_API_TOKEN)
             contentType(ContentType.Application.Json)
             setBody(
-                ImageToImageRequest(
-                    prompt = prompt.text,
-                    image_b64 = image,
-                    negative_prompt = NEGATIVE_PROMPT,
-                    width = 832,
-                    height = 1156,
-                    strength = strength,
+                Request(
+                    listOf(
+                        Content(
+                            listOf(
+                                Part(
+                                    inlineData = InlineData(
+                                        mimeType = "image/jpeg",
+                                        data = image
+                                    )
+                                ),
+                                Part(
+                                    text = prompt.text
+                                )
+                            )
+                        )
+                    )
                 )
             )
         }.body()
@@ -42,11 +60,57 @@ object ApiClient {
 }
 
 @Serializable
-private data class ImageToImageRequest(
-    val prompt: String,
-    val image_b64: String,
-    val negative_prompt: String,
-    val width: Int,
-    val height: Int,
-    val strength: Double
+private data class Request(
+    val contents: List<Content>
+)
+
+@Serializable
+private data class Content(
+    val parts: List<Part>
+)
+
+@Serializable
+data class Part(
+    @SerialName("inline_data")
+    val inlineData: InlineData? = null, // text랑 둘 중 하나만 들어감
+    val text: String? = null // inlineData랑 둘 중 하나만 들어감
+)
+
+@Serializable
+data class InlineData(
+    @SerialName("mime_type")
+    val mimeType: String,
+    val data: String
+)
+
+@Serializable
+data class ApiResponse(
+    @SerialName("candidates")
+    val candidates: List<Candidate>? = null
+)
+
+@Serializable
+data class Candidate(
+    @SerialName("content")
+    val content: ContentResponse? = null
+)
+
+@Serializable
+data class ContentResponse(
+    @SerialName("parts")
+    val parts: List<PartResponse>? = null
+)
+
+@Serializable
+data class PartResponse(
+    @SerialName("inlineData")
+    val inlineData: InlineDataResponse? = null
+)
+
+@Serializable
+data class InlineDataResponse(
+    @SerialName("mimeType")
+    val mimeType: String? = null,
+    @SerialName("data")
+    val data: String? = null
 )
