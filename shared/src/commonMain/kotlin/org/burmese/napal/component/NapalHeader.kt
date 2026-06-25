@@ -15,7 +15,8 @@ import androidx.compose.ui.unit.dp
 fun NapalHeader(
     modifier: Modifier = Modifier,
     title: String,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    trailing: @Composable (() -> Unit)? = null
 ) {
     Box(
         modifier = modifier
@@ -35,5 +36,14 @@ fun NapalHeader(
             fontWeight = FontWeight.Bold,
             fontSize = 16.dp
         )
+        if (trailing != null) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .padding(end = 24.dp)
+            ) {
+                trailing()
+            }
+        }
     }
 }

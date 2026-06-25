@@ -49,7 +49,7 @@ fun App() {
                 }
                 composable<Create> {
                     CreateScreen(
-                        modifier = Modifier.padding(innerPadding),
+                        modifier = Modifier,
                         onBack = { navController.popBackStack() },
                         card = card,
                         onUpdateCard = { card = it },

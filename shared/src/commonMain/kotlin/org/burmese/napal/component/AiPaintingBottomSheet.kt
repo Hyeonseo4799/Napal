@@ -84,7 +84,7 @@ fun AiPaintingBottomSheet(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         NapalText("✦", color = AccentCyan, fontSize = 20.dp, fontWeight = FontWeight.ExtraBold)
                         Spacer(Modifier.width(8.dp))
-                        NapalText("AI 페인팅", color = TextPrimary, fontSize = 20.dp, fontWeight = FontWeight.ExtraBold)
+                        NapalText("AI 페인팅 (Beta)", color = TextPrimary, fontSize = 20.dp, fontWeight = FontWeight.ExtraBold)
                     }
                     Spacer(Modifier.height(6.dp))
                     NapalText(

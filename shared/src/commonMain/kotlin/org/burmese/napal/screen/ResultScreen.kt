@@ -82,6 +82,7 @@ fun ResultScreen(
     viewModel: ResultViewModel = viewModel { ResultViewModel() }
 ) {
     var showBottomSheet by remember { mutableStateOf(false) }
+    var isDarkText by remember { mutableStateOf(false) }
     val rotation = remember { Animatable(Offset.Zero, Offset.VectorConverter) }
     val scale = remember { Animatable(1f) }
     val scope = rememberCoroutineScope()
@@ -141,7 +142,13 @@ fun ResultScreen(
             NapalHeader(
                 modifier = Modifier.zIndex(1f),
                 title = "내 카드",
-                onBack = onBack
+                onBack = onBack,
+                trailing = {
+                    TextColorToggleButton(
+                        isActive = isDarkText,
+                        onClick = { isDarkText = !isDarkText }
+                    )
+                }
             )
             Box(
                 modifier = Modifier
@@ -201,6 +208,10 @@ fun ResultScreen(
                     contentDescription = "img_card",
                     contentScale = ContentScale.Crop,
                 )
+                val cardNameColor = if (isDarkText) Color(0xFF14151F) else Color(0xFFEEF0F8)
+                val cardMessageColor = if (isDarkText) Color(0xFF2E3142) else Color(0xFFC8CBE0)
+                val cardTagTextColor = if (isDarkText) Color(0xFF0F3F3B) else Color(0xFFA9E3DD)
+
                 Column(
                     modifier = Modifier
                         .align(Alignment.BottomStart)
@@ -211,7 +222,7 @@ fun ResultScreen(
                         text = card.name,
                         fontSize = 21.dp,
                         fontWeight = FontWeight.ExtraBold,
-                        color = Color(0xFFEEF0F8),
+                        color = cardNameColor,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -219,7 +230,7 @@ fun ResultScreen(
                         text = card.message,
                         fontSize = 12.dp,
                         fontWeight = FontWeight.Medium,
-                        color = Color(0xFFC8CBE0),
+                        color = cardMessageColor,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -248,7 +259,7 @@ fun ResultScreen(
                                 NapalText(
                                     text = it,
                                     fontSize = 11.dp,
-                                    color = Color(0xFFA9E3DD),
+                                    color = cardTagTextColor,
                                     fontWeight = FontWeight.SemiBold,
                                 )
                             }
@@ -412,11 +423,53 @@ fun ResultScreen(
             AiPaintingBottomSheet(
                 onDismiss = { showBottomSheet = false },
                 onGenerate = { prompt ->
+                    showBottomSheet = false
                     val byteArray = card.byteArray
                     byteArray?.let { viewModel.generateImage(prompt = prompt, byteArray = byteArray) }
                         ?: run { scope.launch { snackbarHostState.showSnackbar("원본 이미지를 찾을 수 없어요") } }
                 }
             )
         }
+    }
+}
+
+@Composable
+private fun TextColorToggleButton(
+    isActive: Boolean,
+    onClick: () -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+
+    Button(
+        modifier = Modifier
+            .size(38.dp)
+            .clip(CircleShape),
+        onClick = onClick,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = when {
+                isActive -> Color(0xFF46D6CD)
+                isPressed -> Color(0xFF13252F)
+                else -> Color(0x0DFFFFFF)
+            },
+        ),
+        border = BorderStroke(
+            width = 1.dp,
+            color = when {
+                isActive -> Color(0xFF46D6CD)
+                isPressed -> Color(0xFF1D4950)
+                else -> Color(0x14FFFFFF)
+            }
+        ),
+        shape = CircleShape,
+        contentPadding = PaddingValues(0.dp), // 기본 패딩 삭제 (텍스트 잘림 방지)
+        interactionSource = interactionSource
+    ) {
+        NapalText(
+            text = "T",
+            fontSize = 14.dp,
+            color = if (isActive) Color(0xFF072B2A) else Color(0xFFC8CBE0),
+            fontWeight = FontWeight.Bold
+        )
     }
 }
