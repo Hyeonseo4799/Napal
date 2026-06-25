@@ -21,15 +21,18 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import napal.shared.generated.resources.Res
 import napal.shared.generated.resources.img_card
 import org.burmese.napal.component.NapalText
@@ -47,6 +50,9 @@ fun HomeScreen(
 
     val createIsPressed by createInteractionSource.collectIsPressedAsState()
     val galleryIsPressed by galleryInteractionSource.collectIsPressedAsState()
+
+    val coroutineScope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     val transition = rememberInfiniteTransition(label = "splash")
     val floatY by transition.animateFloat(
@@ -122,7 +128,11 @@ fun HomeScreen(
                     }
                 ),
                 shape = RoundedCornerShape(18.dp),
-                onClick = goToGallery,
+                onClick = {
+                    coroutineScope.launch {
+                        snackbarHostState.showSnackbar("아직 개발 중인 기능입니다")
+                    }
+                },
                 interactionSource = galleryInteractionSource
             ) {
                 NapalText(

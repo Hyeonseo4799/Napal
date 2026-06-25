@@ -188,7 +188,7 @@ fun CreateScreen(
             ),
             shape = RoundedCornerShape(18.dp),
             onClick = {
-                if (card.byteArray == null && snackbarHostState.currentSnackbarData == null) {
+                if (card.byteArray == null) {
                     coroutineScope.launch {
                         snackbarHostState.showSnackbar("카드 이미지를 선택해주세요")
                     }

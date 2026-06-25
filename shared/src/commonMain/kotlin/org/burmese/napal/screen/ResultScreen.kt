@@ -32,7 +32,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -64,11 +64,11 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
+import org.burmese.napal.component.AiPaintingBottomSheet
 import org.burmese.napal.component.NapalHeader
 import org.burmese.napal.component.NapalText
 import org.burmese.napal.component.drawGradientBackground
 import org.burmese.napal.domain.Card
-import org.burmese.napal.domain.Prompt
 import org.burmese.napal.platform.saveImageToGallery
 import org.burmese.napal.viewmodel.ResultViewModel
 import kotlin.random.Random
@@ -85,7 +85,7 @@ fun ResultScreen(
     val rotation = remember { Animatable(Offset.Zero, Offset.VectorConverter) }
     val scale = remember { Animatable(1f) }
     val scope = rememberCoroutineScope()
-    val bottomSheetState = rememberModalBottomSheetState()
+    val snackbarHostState = remember { SnackbarHostState() }
     val cardGraphicsLayer = rememberGraphicsLayer()
     val platformContext = LocalPlatformContext.current
 
@@ -409,57 +409,14 @@ fun ResultScreen(
         }
 
         if (showBottomSheet) {
-            val styleOptions = listOf(
-                "유화" to Prompt.OilPainting(),
-                "실사" to Prompt.Photorealistic(),
-                "애니메이션" to Prompt.AnimeStyle(),
-                "도트" to Prompt.PixelArt()
-            )
-
-            ModalBottomSheet(
-                sheetState = bottomSheetState,
-                onDismissRequest = { showBottomSheet = false }
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp, vertical = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    NapalText(
-                        text = "어떤 스타일로 그려드릴까요?",
-                        fontSize = 16.dp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF0C0D1A)
-                    )
-                    styleOptions.forEach { (label, prompt) ->
-                        Button(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(48.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFF46d6cd)
-                            ),
-                            shape = RoundedCornerShape(14.dp),
-                            onClick = {
-                                val byteArray = card.byteArray
-                                if (byteArray != null) {
-                                    viewModel.generateImage(prompt, byteArray)
-                                }
-                                scope.launch { bottomSheetState.hide() }
-                                showBottomSheet = false
-                            }
-                        ) {
-                            NapalText(
-                                text = label,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 14.dp,
-                                color = Color(0xFF072B2A)
-                            )
-                        }
-                    }
+            AiPaintingBottomSheet(
+                onDismiss = { showBottomSheet = false },
+                onGenerate = { prompt ->
+                    val byteArray = card.byteArray
+                    byteArray?.let { viewModel.generateImage(prompt = prompt, byteArray = byteArray) }
+                        ?: run { scope.launch { snackbarHostState.showSnackbar("원본 이미지를 찾을 수 없어요") } }
                 }
-            }
+            )
         }
     }
 }
