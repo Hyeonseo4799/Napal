@@ -367,22 +367,6 @@ fun ResultScreen(
                     }
                 }
             }
-
-            if (uiState.isLoading) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color(0x99000000))
-                        .clickable(
-                            indication = null,
-                            interactionSource = null
-                        ) { /** no-op */ },
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(color = Color(0xFF46d6cd))
-                }
-            }
-
             // 에러 처리 추후 변경
             uiState.error?.let { errorMessage ->
                 Box(
@@ -429,6 +413,22 @@ fun ResultScreen(
                         ?: run { scope.launch { snackbarHostState.showSnackbar("원본 이미지를 찾을 수 없어요") } }
                 }
             )
+        }
+
+        if (uiState.isLoading) {
+            Box(
+                modifier = Modifier
+                    .zIndex(2f) // 헤더 보다 상위
+                    .fillMaxSize()
+                    .background(Color(0x99000000))
+                    .clickable(
+                        indication = null,
+                        interactionSource = null
+                    ) { /** no-op */ },
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = Color(0xFF46d6cd))
+            }
         }
     }
 }

@@ -120,7 +120,7 @@ fun AiPaintingBottomSheet(
                 Triple(Prompt.Photorealistic(), "실사화", SwatchKind.BlueNavy),
                 Triple(Prompt.AnimeStyle(), "애니화", SwatchKind.PinkPurple),
                 Triple(Prompt.OilPainting(), "유화", SwatchKind.OrangeYellow),
-                Triple(Prompt.PixelArt(), "도트", SwatchKind.Pixel),
+                Triple(Prompt.Doodle(), "낙서", SwatchKind.Pixel),
             )
             styleItems.chunked(2).forEach { rowItems ->
                 Row(
