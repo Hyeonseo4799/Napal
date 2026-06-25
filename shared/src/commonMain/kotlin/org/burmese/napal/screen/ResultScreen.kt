@@ -416,7 +416,7 @@ fun ResultScreen(
         }
 
         if (uiState.isLoading) {
-            Box(
+            Column(
                 modifier = Modifier
                     .zIndex(2f) // 헤더 보다 상위
                     .fillMaxSize()
@@ -425,8 +425,15 @@ fun ResultScreen(
                         indication = null,
                         interactionSource = null
                     ) { /** no-op */ },
-                contentAlignment = Alignment.Center
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp, alignment = Alignment.CenterVertically)
             ) {
+                NapalText(
+                    text = "AI 페인팅 기능은 10초 이상 걸릴 수 있어요\n장시간 대기해도 안된다면 재접속 해주세요.",
+                    fontSize = 12.dp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color(0xFFEEF0F8),
+                )
                 CircularProgressIndicator(color = Color(0xFF46d6cd))
             }
         }
