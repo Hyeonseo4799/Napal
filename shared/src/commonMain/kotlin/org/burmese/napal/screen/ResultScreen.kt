@@ -47,9 +47,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
@@ -83,6 +87,7 @@ fun ResultScreen(
 ) {
     var showBottomSheet by remember { mutableStateOf(false) }
     var isDarkText by remember { mutableStateOf(false) }
+    var isHoloEnabled by remember { mutableStateOf(false) }
     val rotation = remember { Animatable(Offset.Zero, Offset.VectorConverter) }
     val scale = remember { Animatable(1f) }
     val scope = rememberCoroutineScope()
@@ -208,9 +213,54 @@ fun ResultScreen(
                     contentDescription = "img_card",
                     contentScale = ContentScale.Crop,
                 )
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(if (isDarkText) Color(0x1AFFFFFF) else Color(0x1A000000))
+                )
+                if (isHoloEnabled) {
+                    Canvas(modifier = Modifier.fillMaxSize()) {
+                        val tiltNormX = (rotation.value.x / 22.5f).coerceIn(-1f, 1f)
+                        val tiltNormY = (rotation.value.y / 22.5f).coerceIn(-1f, 1f)
+                        val shiftX = tiltNormY * size.width * 0.5f
+                        val shiftY = -tiltNormX * size.height * 0.5f
+                        drawRect(
+                            brush = Brush.linearGradient(
+                                colors = listOf(
+                                    Color(0x80FF0055),
+                                    Color(0x80FF7700),
+                                    Color(0x80EEFF00),
+                                    Color(0x8000FF88),
+                                    Color(0x8000AAFF),
+                                    Color(0x806600FF),
+                                    Color(0x80FF0055),
+                                ),
+                                start = Offset(shiftX, shiftY),
+                                end = Offset(size.width + shiftX, size.height + shiftY)
+                            ),
+                            blendMode = BlendMode.Overlay
+                        )
+                        drawRect(
+                            brush = Brush.radialGradient(
+                                colors = listOf(Color(0x66FFFFFF), Color(0x00FFFFFF)),
+                                center = Offset(
+                                    size.width * 0.5f + tiltNormY * size.width * 0.35f,
+                                    size.height * 0.5f - tiltNormX * size.height * 0.35f
+                                ),
+                                radius = size.width * 0.55f
+                            ),
+                            blendMode = BlendMode.Overlay
+                        )
+                    }
+                }
                 val cardNameColor = if (isDarkText) Color(0xFF14151F) else Color(0xFFEEF0F8)
                 val cardMessageColor = if (isDarkText) Color(0xFF2E3142) else Color(0xFFC8CBE0)
                 val cardTagTextColor = if (isDarkText) Color(0xFF0F3F3B) else Color(0xFFA9E3DD)
+                val cardTextShadow = Shadow(
+                    color = if (isDarkText) Color(0x33FFFFFF) else Color(0xB3000000),
+                    offset = Offset(0f, 1f),
+                    blurRadius = 8f
+                )
 
                 Column(
                     modifier = Modifier
@@ -223,6 +273,7 @@ fun ResultScreen(
                         fontSize = 21.dp,
                         fontWeight = FontWeight.ExtraBold,
                         color = cardNameColor,
+                        style = TextStyle(shadow = cardTextShadow),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -231,6 +282,7 @@ fun ResultScreen(
                         fontSize = 12.dp,
                         fontWeight = FontWeight.Medium,
                         color = cardMessageColor,
+                        style = TextStyle(shadow = cardTextShadow),
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -260,6 +312,7 @@ fun ResultScreen(
                                     text = it,
                                     fontSize = 11.dp,
                                     color = cardTagTextColor,
+                                    style = TextStyle(shadow = cardTextShadow),
                                     fontWeight = FontWeight.SemiBold,
                                 )
                             }
@@ -272,6 +325,7 @@ fun ResultScreen(
 
             val shareInteractionSource = remember { MutableInteractionSource() }
             val shareIsPressed by paintInteractionSource.collectIsPressedAsState()
+            val holoInteractionSource = remember { MutableInteractionSource() }
             Row(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
@@ -303,6 +357,40 @@ fun ResultScreen(
                     )
                 }
                 Spacer(modifier = Modifier.width(12.dp))
+                Button(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clip(CircleShape),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0x0DFFFFFF)
+                    ),
+                    border = BorderStroke(
+                        width = 1.dp,
+                        color = if (isHoloEnabled) Color(0xFF46D6CD) else Color(0x1FFFFFFF)
+                    ),
+                    shape = CircleShape,
+                    contentPadding = PaddingValues(0.dp),
+                    onClick = { isHoloEnabled = !isHoloEnabled },
+                    interactionSource = holoInteractionSource
+                ) {
+                    Canvas(modifier = Modifier.size(20.dp)) {
+                        drawCircle(
+                            brush = Brush.sweepGradient(
+                                colors = listOf(
+                                    Color(0xFFFF0055),
+                                    Color(0xFFFF7700),
+                                    Color(0xFFEEFF00),
+                                    Color(0xFF00FF88),
+                                    Color(0xFF00AAFF),
+                                    Color(0xFF6600FF),
+                                    Color(0xFFFF0055),
+                                )
+                            ),
+                            alpha = if (isHoloEnabled) 1f else 0.35f
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.width(8.dp))
                 Button(
                     modifier = Modifier
                         .size(56.dp)

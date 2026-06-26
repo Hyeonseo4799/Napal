@@ -16,12 +16,8 @@ val localProperties = Properties().apply {
     }
 }
 
-val cfApiToken: String = localProperties.getProperty("CF_API_TOKEN")
-    ?: System.getenv("CF_API_TOKEN")
-    ?: ""
-
-val cfAccountId : String = localProperties.getProperty("CF_ACCOUNT_ID")
-    ?: System.getenv("CF_ACCOUNT_ID")
+val apiKey: String = localProperties.getProperty("API_KEY")
+    ?: System.getenv("API_KEY")
     ?: ""
 
 
@@ -29,8 +25,7 @@ val generatedSecretsDir = layout.buildDirectory.dir("generated/secrets")
 
 val generateSecrets by tasks.registering {
     val outputDir = generatedSecretsDir
-    val apiToken = cfApiToken
-    val accountId = cfAccountId
+    val googleApiKey = apiKey
     outputs.dir(outputDir)
     doLast {
         val file = outputDir.get().file("org/burmese/napal/network/Secrets.kt").asFile
@@ -40,8 +35,7 @@ val generateSecrets by tasks.registering {
             package org.burmese.napal.network
 
             internal object Secrets {
-                const val CF_API_TOKEN: String = "$apiToken"
-                const val CF_ACCOUNT_ID: String = "$accountId"
+                const val CF_API_TOKEN: String = "$googleApiKey"
             }
             """.trimIndent()
         )
