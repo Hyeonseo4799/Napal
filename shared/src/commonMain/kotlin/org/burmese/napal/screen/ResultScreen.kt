@@ -69,6 +69,7 @@ import kotlinx.coroutines.launch
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
 import org.burmese.napal.component.AiPaintingBottomSheet
+import org.burmese.napal.component.CardEffectOverlay
 import org.burmese.napal.component.NapalHeader
 import org.burmese.napal.component.NapalText
 import org.burmese.napal.component.drawGradientBackground
@@ -90,6 +91,8 @@ fun ResultScreen(
     var isHoloEnabled by remember { mutableStateOf(false) }
     val rotation = remember { Animatable(Offset.Zero, Offset.VectorConverter) }
     val scale = remember { Animatable(1f) }
+    val effectSpinY = remember { Animatable(0f) }
+    val effectScale = remember { Animatable(1f) }
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     val cardGraphicsLayer = rememberGraphicsLayer()
@@ -161,9 +164,9 @@ fun ResultScreen(
                     .size(width = 224.dp, height = 310.dp)
                     .graphicsLayer {
                         rotationX = rotation.value.x
-                        rotationY = rotation.value.y
-                        scaleX = scale.value
-                        scaleY = scale.value
+                        rotationY = rotation.value.y + effectSpinY.value
+                        scaleX = scale.value * effectScale.value
+                        scaleY = scale.value * effectScale.value
                         cameraDistance = 8 * density
                     }
                     .clip(RoundedCornerShape(24.dp))
@@ -524,6 +527,18 @@ fun ResultScreen(
                 )
                 CircularProgressIndicator(color = Color(0xFF46d6cd))
             }
+        }
+
+        uiState.specialEffect?.let { effect ->
+            CardEffectOverlay(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .zIndex(3f),
+                effect = effect,
+                effectSpinY = effectSpinY,
+                effectScale = effectScale,
+                onFinished = { viewModel.clearSpecialEffect() }
+            )
         }
     }
 }
