@@ -449,42 +449,39 @@
     margin-bottom:9px;
   }
 
-  /* ---------- cross platform (feature 2) ---------- */
-  .phones-row{
+  /* ---------- holographic demo (feature 2) ---------- */
+  .holo-card-wrap{
     display:flex;
     align-items:center;
     justify-content:center;
-    gap:22px;
     padding:20px 0;
   }
-  .phone{
-    width:140px;
-    height:280px;
-    border-radius:28px;
-    background:#06070d;
-    border:1px solid rgba(255,255,255,0.12);
-    padding:8px;
-    box-shadow:0 24px 50px -20px rgba(0,0,0,0.55);
-  }
-  .phone-screen{
-    width:100%;height:100%;
-    border-radius:20px;
+  .holo-demo-card{
+    width:180px;
+    height:250px;
+    border-radius:16px;
     overflow:hidden;
     position:relative;
+    box-shadow:0 24px 50px -20px rgba(0,0,0,0.55);
+    border:1px solid rgba(255,255,255,0.12);
   }
-  .phone-screen img{width:100%;height:100%;object-fit:cover;}
-  .phone-label{
-    text-align:center;
-    font-size:12px;
-    font-weight:700;
-    color:var(--text-secondary);
-    margin-top:12px;
-    letter-spacing:0.03em;
+  .holo-demo-card img{width:100%;height:100%;object-fit:cover;}
+  .holo-overlay{
+    position:absolute;
+    inset:0;
+    background:linear-gradient(135deg,
+      #ff005580 0%,#ff770080 14%,#eeff0080 28%,
+      #00ff8880 42%,#00aaff80 57%,#6600ff80 71%,
+      #ff005580 85%,#ff770080 100%
+    );
+    mix-blend-mode:overlay;
+    background-size:300% 300%;
+    animation:holoMove 3s linear infinite;
   }
-  .sync-icon{
-    color:var(--accent);
-    font-size:20px;
-    flex:none;
+  @keyframes holoMove{
+    0%{background-position:0% 0%;}
+    50%{background-position:100% 100%;}
+    100%{background-position:0% 0%;}
   }
 
   /* ---------- interactive play demo (feature 3) ---------- */
@@ -564,6 +561,7 @@
   .ribbon{
     position:absolute;
     top:18px;right:-34px;
+    z-index:10;
     background:var(--gold);
     color:#241a05;
     font-size:11px;
@@ -598,8 +596,7 @@
     .feature.alt .feature-grid{direction:ltr;}
     .nav-links{display:none;}
     .gallery-grid{grid-template-columns:repeat(2,1fr);}
-    .phones-row{gap:14px;}
-    .phone{width:118px;height:236px;}
+    .holo-demo-card{width:150px;height:208px;}
   }
 </style>
 </head>
@@ -634,7 +631,7 @@
     <div class="chip-row">
       <span class="chip"><span class="spark">✦</span>AI 페인팅 4종</span>
       <span class="chip"><span class="spark">⛶</span>핀치줌 · 3D 틸트</span>
-      <span class="chip"><span class="spark">❖</span>iOS · Android 동시 지원</span>
+      <span class="chip"><span class="spark">◈</span>홀로그램 효과</span>
     </div>
     <div class="hero-stage">
       <div class="hero-card-glow"></div>
@@ -697,27 +694,20 @@
   </div>
 </section>
 
-<section id="feature-cross" class="feature alt">
+<section id="feature-holo" class="feature">
   <div class="wrap">
-    <div class="feature-grid">
-      <div class="reveal">
-        <div class="phones-row">
-          <div class="phone"><div class="phone-screen"><img class="js-card-img" alt="ios card"></div></div>
-          <div class="sync-icon">⇄</div>
-          <div class="phone"><div class="phone-screen"><img class="js-card-img" alt="android card"></div></div>
-        </div>
-        <div style="display:flex;justify-content:center;gap:38px;margin-top:4px;">
-          <span class="phone-label">iOS</span>
-          <span class="phone-label">Android</span>
-        </div>
-      </div>
-      <div class="feature-text reveal">
-        <span class="feature-tag">FEATURE 02</span>
-        <h3>어디서든, 같은 방식으로</h3>
-        <p>iOS와 Android 모두에서 동일한 경험을 제공해요.<br>어떤 기기를 쓰더라도, 같은 기능을 사용하여 카드를 만들 수 있어요.</p>
-        <span class="chip"><span class="spark">❖</span>하나의 카드, 두 플랫폼에서 동일하게</span>
+    <div class="section-head reveal">
+      <span class="eyebrow">FEATURE 02</span>
+      <h2>홀로그램, 살아 움직이는 카드</h2>
+      <p>카드를 기울이면 빛의 각도에 따라 무지개빛 홀로그램이 실시간으로 변화해요.<br>현실의 트레이딩 카드처럼, 보는 방향마다 다른 색이 흘러요. (온/오프)</p>
+    </div>
+    <div class="holo-card-wrap reveal">
+      <div class="holo-demo-card">
+        <img class="js-card-img" alt="holographic card">
+        <div class="holo-overlay"></div>
       </div>
     </div>
+    <p class="play-hint reveal">홀로그램 버튼을 켜고 카드를 기울여보세요</p>
   </div>
 </section>
 
@@ -747,25 +737,36 @@
 
 <section id="gallery" class="feature">
   <div class="wrap">
-    <div class="feature-grid">
-      <div class="feature-text reveal">
-        <span class="feature-tag">FEATURE 04 · COMING SOON</span>
-        <h3>카드 갤러리 (개발 중)</h3>
-        <p>친구들과 주고받은 카드를 모으고, 나만의 컬렉션으로 정리해보세요.<br>받은 카드를 다시 꾸미고 편집하는 기능도 만나볼 수 있어요.</p>
-      </div>
-      <div class="reveal">
-        <div class="card-frame" style="padding:20px;position:relative;">
-          <span class="ribbon">준비중</span>
-          <div class="gallery-grid">
-            <div class="gallery-tile"><img class="js-card-img" alt=""><span class="lock">🔒</span></div>
-            <div class="gallery-tile"><img class="js-card-img" alt=""><span class="lock">🔒</span></div>
-            <div class="gallery-tile"><img class="js-card-img" alt=""><span class="lock">🔒</span></div>
-            <div class="gallery-tile"><img class="js-card-img" alt=""><span class="lock">🔒</span></div>
-            <div class="gallery-tile"><img class="js-card-img" alt=""><span class="lock">🔒</span></div>
-            <div class="gallery-tile"><img class="js-card-img" alt=""><span class="lock">🔒</span></div>
-          </div>
+    <div class="section-head reveal">
+      <span class="eyebrow">FEATURE 04 · COMING SOON</span>
+      <h2>카드 갤러리 (개발 중)</h2>
+      <p>친구들과 주고받은 카드를 모으고, 나만의 컬렉션으로 정리해보세요.<br>받은 카드를 다시 꾸미고 편집하는 기능도 만나볼 수 있어요.</p>
+    </div>
+    <div class="reveal" style="display:flex;justify-content:center;">
+      <div class="card-frame" style="padding:20px;position:relative;max-width:360px;width:100%;">
+        <span class="ribbon">준비중</span>
+        <div class="gallery-grid">
+          <div class="gallery-tile"><img class="js-card-img" alt=""><span class="lock">🔒</span></div>
+          <div class="gallery-tile"><img class="js-card-img" alt=""><span class="lock">🔒</span></div>
+          <div class="gallery-tile"><img class="js-card-img" alt=""><span class="lock">🔒</span></div>
+          <div class="gallery-tile"><img class="js-card-img" alt=""><span class="lock">🔒</span></div>
+          <div class="gallery-tile"><img class="js-card-img" alt=""><span class="lock">🔒</span></div>
+          <div class="gallery-tile"><img class="js-card-img" alt=""><span class="lock">🔒</span></div>
         </div>
       </div>
+    </div>
+  </div>
+</section>
+
+<section id="easter-egg" class="feature">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">✦ SECRET</span>
+      <h2>그리고, 숨겨진 무언가</h2>
+      <p>AI 페인팅이 완성되는 순간, 아주 드물게 특별한 이펙트가 등장해요.<br>총 5가지 종류가 숨겨져 있지만, 어떤 것이 나올지는 아무도 알 수 없어요.</p>
+    </div>
+    <div class="reveal" style="text-align:center;margin-top:8px;">
+      <span class="chip" style="display:inline-flex;font-size:13px;padding:0 18px;"><span class="spark">?</span>5종의 이스터에그 이펙트 · 직접 발견해보세요</span>
     </div>
   </div>
 </section>
