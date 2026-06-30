@@ -1,6 +1,6 @@
 ﻿package org.burmese.pomi.screen
 
-import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.EaseInOut
 import androidx.compose.animation.core.RepeatMode.Restart
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -23,25 +23,26 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import pomi.shared.generated.resources.Res
-import pomi.shared.generated.resources.img_splash
 import org.burmese.pomi.component.PomiText
 import org.jetbrains.compose.resources.painterResource
+import pomi.shared.generated.resources.img_placeholder_400x600
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
 @Composable
 fun SplashScreen(onFinished: () -> Unit = {}) {
-    // 임시 딜레이 처리
+    // TODO 로딩 딜레이로 변경
     LaunchedEffect(Unit) {
         delay(2L.toDuration(DurationUnit.SECONDS))
         onFinished.invoke()
     }
+
     val transition = rememberInfiniteTransition(label = "splash")
     val cardRotationY by transition.animateFloat(
         initialValue = 0f,
         targetValue = 360f,
         animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 2000, easing = LinearEasing),
+            animation = tween(durationMillis = 2000, easing = EaseInOut),
             repeatMode = Restart
         ),
         label = "cardRotationY"
@@ -55,22 +56,22 @@ fun SplashScreen(onFinished: () -> Unit = {}) {
     ) {
         Image(
             modifier = Modifier
-                .size(width = 118.dp, height = 160.dp)
-                .align(Alignment.Center)
+                .size(width = 100.dp, height = 150.dp)
                 .graphicsLayer {
                     rotationY = cardRotationY
+                    rotationZ = -10f
                     cameraDistance = 12 * density
                 },
-            painter = painterResource(Res.drawable.img_splash),
-            contentDescription = "img_splash"
+            painter = painterResource(Res.drawable.img_placeholder_400x600),
+            contentDescription = "img_placeholder_splash"
         )
         PomiText(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 64.dp),
-            text = "N A P A L",
-            fontSize = 12.dp,
-            color = Color(0xFF43465E),
+            text = "P O M I",
+            fontSize = 14.dp,
+            color = Color(0xFFEFEAFF),
             fontWeight = FontWeight.SemiBold,
         )
     }
