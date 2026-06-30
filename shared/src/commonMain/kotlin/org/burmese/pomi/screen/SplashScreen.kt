@@ -17,6 +17,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
@@ -30,7 +31,10 @@ import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
 @Composable
-fun SplashScreen(onFinished: () -> Unit = {}) {
+fun SplashScreen(
+    modifier: Modifier = Modifier,
+    onFinished: () -> Unit = {}
+) {
     // TODO 로딩 딜레이로 변경
     LaunchedEffect(Unit) {
         delay(2L.toDuration(DurationUnit.SECONDS))
@@ -51,7 +55,14 @@ fun SplashScreen(onFinished: () -> Unit = {}) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF0A0B15)),
+            .background(
+                Brush.verticalGradient(
+                    0f to Color(0xFF23264A),
+                    0.45f to Color(0xFF0C0D1A),
+                    1f to Color(0xFF0C0D1A)
+                )
+            )
+            .then(modifier),
         contentAlignment = Alignment.Center
     ) {
         Image(

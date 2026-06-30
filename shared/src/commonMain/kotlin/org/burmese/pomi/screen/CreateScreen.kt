@@ -1,6 +1,7 @@
 ﻿package org.burmese.pomi.screen
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
@@ -31,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -45,7 +47,6 @@ import pomi.shared.generated.resources.img_placeholder_card
 import org.burmese.pomi.component.PomiHeader
 import org.burmese.pomi.component.PomiText
 import org.burmese.pomi.component.PomiTextField
-import org.burmese.pomi.component.drawGradientBackground
 import org.burmese.pomi.domain.Card
 import org.jetbrains.compose.resources.painterResource
 
@@ -71,7 +72,13 @@ fun CreateScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .drawBehind { drawGradientBackground() }
+            .background(
+                Brush.verticalGradient(
+                    0f to Color(0xFF23264A),
+                    0.45f to Color(0xFF0C0D1A),
+                    1f to Color(0xFF0C0D1A)
+                )
+            )
             .then(modifier)
             .statusBarsPadding()
             .navigationBarsPadding()

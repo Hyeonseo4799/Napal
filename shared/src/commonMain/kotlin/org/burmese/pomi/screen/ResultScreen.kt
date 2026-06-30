@@ -72,7 +72,6 @@ import org.burmese.pomi.component.AiPaintingBottomSheet
 import org.burmese.pomi.component.CardEffectOverlay
 import org.burmese.pomi.component.PomiHeader
 import org.burmese.pomi.component.PomiText
-import org.burmese.pomi.component.drawGradientBackground
 import org.burmese.pomi.domain.Card
 import org.burmese.pomi.platform.saveImageToGallery
 import org.burmese.pomi.viewmodel.ResultViewModel
@@ -113,7 +112,13 @@ fun ResultScreen(
 
     Box(
         modifier = Modifier
-            .drawBehind { drawGradientBackground() }
+            .background(
+                Brush.verticalGradient(
+                    0f to Color(0xFF23264A),
+                    0.45f to Color(0xFF0C0D1A),
+                    1f to Color(0xFF0C0D1A)
+                )
+            )
             .fillMaxSize()
             .then(modifier)
     ) {

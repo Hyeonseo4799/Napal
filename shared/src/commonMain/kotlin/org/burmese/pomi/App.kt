@@ -30,7 +30,10 @@ fun App() {
 
     Scaffold { innerPadding ->
         if (showSplash) {
-            SplashScreen(onFinished = { showSplash = false })
+            SplashScreen(
+                modifier = Modifier.padding(innerPadding),
+                onFinished = { showSplash = false }
+            )
         } else {
             NavHost(
                 navController = navController,

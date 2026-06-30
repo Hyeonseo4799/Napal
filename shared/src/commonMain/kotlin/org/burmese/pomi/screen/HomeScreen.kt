@@ -8,6 +8,7 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -30,6 +31,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -37,7 +39,6 @@ import kotlinx.coroutines.launch
 import pomi.shared.generated.resources.Res
 import pomi.shared.generated.resources.img_card
 import org.burmese.pomi.component.PomiText
-import org.burmese.pomi.component.drawGradientBackground
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
@@ -69,7 +70,13 @@ fun HomeScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .drawBehind { drawGradientBackground() }
+            .background(
+                Brush.verticalGradient(
+                    0f to Color(0xFF23264A),
+                    0.45f to Color(0xFF0C0D1A),
+                    1f to Color(0xFF0C0D1A)
+                )
+            )
             .then(modifier)
     ) {
         Image(
