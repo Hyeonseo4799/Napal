@@ -1,10 +1,10 @@
-# Napal
+﻿# Pomi
 
-**Nao's Palette** — turn your photos into beautifully styled, interactive keepsake cards.
+**For me, Pomi** — turn your photos into beautifully styled, interactive keepsake cards.
 
 ## Overview
 
-Napal lets you create personalized photo cards — add a name, tags, and a short message to your photo — then reimagine them with AI-powered painting styles. The finished card isn't just an image; it's a small interactive object you can tilt, zoom, and play with.
+Pomi lets you create personalized photo cards — add a name, tags, and a short message to your photo — then reimagine them with AI-powered painting styles. The finished card isn't just an image; it's a small interactive object you can tilt, zoom, and play with.
 
 ## Key Features
 
@@ -12,7 +12,7 @@ Napal lets you create personalized photo cards — add a name, tags, and a short
 Pick a photo, personalize it with a name, tags, and a one-line message, then repaint it into a new art style — photorealistic, anime, oil painting, or doodle. Powered by **Gemini 2.5 Flash Image**.
 
 ### 📱 Cross-Platform
-Built with Kotlin Multiplatform and Compose Multiplatform, Napal runs natively on both **Android and iOS** from a single shared codebase.
+Built with Kotlin Multiplatform and Compose Multiplatform, Pomi runs natively on both **Android and iOS** from a single shared codebase.
 
 ### ✋ Interactive Card Play
 Cards aren't static. Pinch to zoom in and out, and drag to tilt the card in 3D for a tactile, hands-on feel.

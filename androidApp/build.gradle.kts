@@ -1,4 +1,4 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+﻿import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.androidApplication)
@@ -21,11 +21,11 @@ dependencies {
 }
 
 android {
-    namespace = "org.burmese.napal"
+    namespace = "org.burmese.pomi"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     defaultConfig {
-        applicationId = "org.burmese.napal"
+        applicationId = "org.burmese.pomi"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 10001

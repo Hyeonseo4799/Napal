@@ -1,4 +1,4 @@
-rootProject.name = "Napal"
+﻿rootProject.name = "Pomi"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
